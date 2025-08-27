@@ -1,0 +1,59 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <limits>
+
+using namespace std;
+
+struct Student {
+    string name;
+    int grade;
+};
+
+int main() {
+    string className;
+    int numStudents;
+
+    cout << "Enter a Class Name: ";
+    getline(cin, className);
+
+    cout << "Enter # of Students in class: ";
+    while (!(cin >> numStudents) || numStudents <= 0) {
+        cout << "Please enter a valid positive number: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // clear newline
+
+    vector<Student> students(numStudents);
+
+    for (int i = 0; i < numStudents; ++i) {
+        cout << "Enter the name of student #" << (i + 1) << ": ";
+        getline(cin, students[i].name);
+        cout << "Enter the grade for " << students[i].name << ": ";
+        while (!(cin >> students[i].grade) || students[i].grade < 0) {
+            cout << "Please enter a valid (non-negative) grade: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // clear newline
+    }
+
+    vector<int> grades;
+    for (const auto& student : students) {
+        grades.push_back(student.grade);
+    }
+
+    int maxGrade = *max_element(grades.begin(), grades.end());
+    int minGrade = *min_element(grades.begin(), grades.end());
+    double averageGrade = accumulate(grades.begin(), grades.end(), 0.0) / numStudents;
+
+    cout << "\nClass Name: " << className << endl;
+    cout << "Number of Students: " << numStudents << endl;
+    cout << "Average Grade: " << averageGrade << endl;
+    cout << "Maximum Grade: " << maxGrade << endl;
+    cout << "Minimum Grade: " << minGrade << endl;
+
+    return 0;
+}
