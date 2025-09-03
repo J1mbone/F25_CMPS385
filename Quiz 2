@@ -1,0 +1,108 @@
+//
+//  main.cpp
+//  Class
+//
+//  Created by Jimmy Rumsey on 9/3/25.
+//
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Task {
+private:
+    int id;
+    string description;
+    bool done;
+
+public:
+
+    Task() : id(0), description(""), done(false) {}
+    Task(int i, const string& d) : id(i), description(d), done(false) {}
+
+
+    int getId() const { return id; }
+    string getDescription() const { return description; }
+    bool isDone() const { return done; }
+
+
+    void toggle() { done = !done; }
+
+
+    void display() const {
+        cout << "ID: " << id << " | \"" << description << "\" | Status: "
+             << (done ? "Done" : "Pending") << endl;
+    }
+};
+
+int main() {
+    const int MAX_TASKS = 50;
+    Task tasks[MAX_TASKS];
+    int taskCount = 0;
+    int nextId = 1001;
+
+    int choice;
+    do {
+        cout << "**************** Welcome to To-Do Manager *****************\n";
+        cout << "1 - Add task\n";
+        cout << "2 - Toggle task (by ID)\n";
+        cout << "3 - List pending tasks\n";
+        cout << "0 - Exit\n";
+        cout << "Choice: ";
+        cin >> choice;
+        cin.ignore(); 
+
+        if (choice == 1) {
+            if (taskCount >= MAX_TASKS) {
+                cout << "Task list is full!\n";
+            } else {
+                string desc;
+                cout << "Enter description: ";
+                getline(cin, desc);
+                tasks[taskCount] = Task(nextId, desc);
+                cout << "Task added! ID: " << nextId << endl;
+                taskCount++;
+                nextId++;
+            }
+        }
+        else if (choice == 2) {
+            int id;
+            cout << "Enter Task ID: ";
+            cin >> id;
+            bool found = false;
+            for (int i = 0; i < taskCount; i++) {
+                if (tasks[i].getId() == id) {
+                    tasks[i].toggle();
+                    cout << "Toggled task " << id << "." << endl;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                cout << "Task not found." << endl;
+            }
+        }
+        else if (choice == 3) {
+            bool anyPending = false;
+            for (int i = 0; i < taskCount; i++) {
+                if (!tasks[i].isDone()) {
+                    tasks[i].display();
+                    anyPending = true;
+                }
+            }
+            if (!anyPending) {
+                cout << "No pending tasks." << endl;
+            }
+        }
+        else if (choice == 0) {
+            cout << "Goodbye" << endl;
+        }
+        else {
+            cout << "Invalid choice. Try again.\n";
+        }
+
+        cout << "-----------------------------------------------------------\n";
+    } while (choice != 0);
+
+    return 0;
+}
