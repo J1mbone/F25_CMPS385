@@ -1,0 +1,105 @@
+
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+struct Date {
+    int day;
+    int month;
+    int year;
+};
+
+struct Appointment {
+    int id;
+    string name;
+    Date date;
+    string purpose;
+};
+
+Appointment schedule[50];
+int countAppointments = 0;
+
+void addAppointment() {
+    if (countAppointments >= 50) {
+        cout << "Schedule is full. Cannot add more appointments.\n";
+        return;
+    }
+
+    Appointment newApp;
+    cout << "Enter name: ";
+    cin.ignore();
+    getline(cin, newApp.name);
+
+    cout << "Enter appointment date (day month year): ";
+    cin >> newApp.date.day >> newApp.date.month >> newApp.date.year;
+
+    cout << "Enter purpose: ";
+    cin.ignore();
+    getline(cin, newApp.purpose);
+
+    newApp.id = 1000 + rand() % 9000;
+
+    schedule[countAppointments++] = newApp;
+
+    cout << "Appointment added successfully! ID: " << newApp.id << endl;
+}
+
+void viewAppointmentsByDate() {
+    Date searchDate;
+    cout << "Enter date to search (day month year): ";
+    cin >> searchDate.day >> searchDate.month >> searchDate.year;
+
+    bool found = false;
+    cout << "Appointments on " << searchDate.day << "/"
+         << searchDate.month << "/" << searchDate.year << ":\n";
+    cout << "ID | Name | Purpose\n";
+    cout << "-------------------------\n";
+
+    for (int i = 0; i < countAppointments; i++) {
+        if (schedule[i].date.day == searchDate.day &&
+            schedule[i].date.month == searchDate.month &&
+            schedule[i].date.year == searchDate.year) {
+            
+            cout << schedule[i].id << " | "
+                 << schedule[i].name << " | "
+                 << schedule[i].purpose << endl;
+            found = true;
+        }
+    }
+
+    if (!found) {
+        cout << "No appointments for this date.\n";
+    }
+}
+
+int main() {
+    srand(time_t(0));
+    int choice;
+
+    do {
+        cout << "\n******** Appointment Scheduler ********\n";
+        cout << "1. Add a new appointment\n";
+        cout << "2. View appointments by date\n";
+        cout << "3. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                addAppointment();
+                break;
+            case 2:
+                viewAppointmentsByDate();
+                break;
+            case 3:
+                cout << "Thank you for using the scheduler!\n";
+                break;
+            default:
+                cout << "Invalid choice. Try again.\n";
+        }
+    } while (choice != 3);
+
+    return 0;
+}
