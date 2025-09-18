@@ -1,0 +1,192 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+class BankAccount {
+protected:
+    string name;
+    int accountNumber;
+    double balance;
+
+public:
+    BankAccount(string n, int accNum, double bal)
+        : name(n), accountNumber(accNum), balance(bal) {}
+
+    virtual void deposit(double amount) {
+        balance += amount;
+        cout << "Deposited: $" << amount << endl;
+    }
+
+    virtual void withdraw(double amount) {
+        if (amount > balance) {
+            cout << "Insufficient funds.\n";
+        } else {
+            balance -= amount;
+            cout << "Withdrawn: $" << amount << endl;
+        }
+    }
+
+    virtual void displayBalance() const {
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Current Balance: $" << balance << endl;
+    }
+
+    int getAccountNumber() const {
+        return accountNumber;
+    }
+
+    virtual ~BankAccount() {}
+};
+
+class SavingsAccount : public BankAccount {
+public:
+    SavingsAccount(string n, int accNum, double bal)
+        : BankAccount(n, accNum, bal) {}
+};
+
+vector<BankAccount*> accounts;
+
+BankAccount* findAccount(int accNum) {
+    for (auto acc : accounts) {
+        if (acc->getAccountNumber() == accNum) {
+            return acc;
+        }
+    }
+    return nullptr;
+}
+
+void createAccount() {
+    string name;
+    double initialBalance;
+
+    cout << "Enter your name: ";
+    cin.ignore();
+    getline(cin, name);
+
+    cout << "Enter initial balance: $";
+    cin >> initialBalance;
+
+    int accountNumber = rand() % 900000 + 100000;
+    BankAccount* newAccount = new SavingsAccount(name, accountNumber, initialBalance);
+    accounts.push_back(newAccount);
+
+    cout << "\nAccount created successfully!\n";
+    cout << "Name: " << name << endl;
+    cout << "Account Number: " << accountNumber << endl;
+    cout << "Balance: $" << initialBalance << endl;
+    cout << "\nPress any key to return to the Main Menu...\n";
+    cin.ignore();
+    cin.get();
+}
+
+void depositMoney() {
+    int accNum;
+    double amount;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    BankAccount* acc = findAccount(accNum);
+    if (acc) {
+        cout << "Enter amount to deposit: $";
+        cin >> amount;
+        acc->deposit(amount);
+        acc->displayBalance();
+    } else {
+        cout << "Account number does not exist.\n";
+    }
+
+    cout << "\nPress any key to return to the Main Menu...\n";
+    cin.ignore();
+    cin.get();
+}
+
+void withdrawMoney() {
+    int accNum;
+    double amount;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    BankAccount* acc = findAccount(accNum);
+    if (acc) {
+        cout << "Enter amount to withdraw: $";
+        cin >> amount;
+        acc->withdraw(amount);
+        acc->displayBalance();
+    } else {
+        cout << "Account number does not exist.\n";
+    }
+
+    cout << "\nPress any key to return to the Main Menu...\n";
+    cin.ignore();
+    cin.get();
+}
+
+void displayBalance() {
+    int accNum;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    BankAccount* acc = findAccount(accNum);
+    if (acc) {
+        acc->displayBalance();
+    } else {
+        cout << "Account number does not exist.\n";
+    }
+
+    cout << "\nPress any key to return to the Main Menu...\n";
+    cin.ignore();
+    cin.get();
+}
+
+void showMenu() {
+    cout << "\n====== Welcome to Chase ======\n";
+    cout << "Type a number that you would like to perform:\n";
+    cout << "1. Create a new bank account\n";
+    cout << "2. Deposit money\n";
+    cout << "3. Withdraw money\n";
+    cout << "4. Display current balance\n";
+    cout << "5. Exit\n";
+    cout << "Your choice: ";
+}
+
+int main() {
+    srand(time_t(0));
+
+    int choice;
+
+    do {
+        showMenu();
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                createAccount();
+                break;
+            case 2:
+                depositMoney();
+                break;
+            case 3:
+                withdrawMoney();
+                break;
+            case 4:
+                displayBalance();
+                break;
+            case 5:
+                cout << "Thank you for using Chase Bank. Goodbye!\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+
+    } while (choice != 5);
+
+    for (auto acc : accounts) {
+        delete acc;
+    }
+
+    return 0;
+}
