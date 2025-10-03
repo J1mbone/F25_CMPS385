@@ -1,0 +1,123 @@
+#include <iostream>
+using namespace std;
+
+void displayGrades(int grades[], int size, int index = 0) {
+    if (index == size) {
+        cout << endl;
+        return;
+    }
+    cout << grades[index] << " ";
+    displayGrades(grades, size, index + 1);
+}
+
+int sumGrades(int grades[], int size, int index = 0) {
+    if (index == size) {
+        return 0;
+    }
+    return grades[index] + sumGrades(grades, size, index + 1);
+}
+
+int countFailing(int grades[], int size, int index = 0) {
+    if (index == size) {
+        return 0;
+    }
+    int fail = (grades[index] < 60) ? 1 : 0;
+    return fail + countFailing(grades, size, index + 1);
+}
+
+int findMax(int grades[], int size, int index = 0, int currentMax = -1) {
+    if (index == size) {
+        return currentMax;
+    }
+    if (grades[index] > currentMax) {
+        currentMax = grades[index];
+    }
+    return findMax(grades, size, index + 1, currentMax);
+}
+
+int main() {
+    const int MAX = 100;
+    int grades[MAX];
+    int gradeCount = 0;
+    int choice;
+
+    cout << "******** Welcome to Recursive Grade Analyzer ********" << endl;
+
+    do {
+        cout << "\nPlease choose one of the following operations:" << endl;
+        cout << "1. Enter Grades" << endl;
+        cout << "2. Display Grades" << endl;
+        cout << "3. Calculate Average Grade (using Recursion)" << endl;
+        cout << "4. Count Failing Grades (using Recursion)" << endl;
+        cout << "5. Find Highest Grade (using Recursion)" << endl;
+        cout << "6. Exit" << endl;
+        cout << "→ ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                cout << "How many grades do you want to enter?" << endl;
+                cout << "→ ";
+                cin >> gradeCount;
+
+                if (gradeCount > MAX) {
+                    cout << "Error: Maximum number of grades is " << MAX << endl;
+                    gradeCount = 0;
+                    break;
+                }
+
+                for (int i = 0; i < gradeCount; i++) {
+                    cout << "Enter grade #" << (i + 1) << ": ";
+                    cin >> grades[i];
+                }
+                cout << "Grades successfully saved!" << endl;
+                break;
+            }
+            case 2: {
+                if (gradeCount == 0) {
+                    cout << "No grades entered yet." << endl;
+                } else {
+                    cout << "Grades entered:" << endl;
+                    cout << "→ ";
+                    displayGrades(grades, gradeCount);
+                }
+                break;
+            }
+            case 3: {
+                if (gradeCount == 0) {
+                    cout << "No grades to calculate average." << endl;
+                } else {
+                    double average = (double)sumGrades(grades, gradeCount) / gradeCount;
+                    cout << "The average grade is: " << average << endl;
+                }
+                break;
+            }
+            case 4: {
+                if (gradeCount == 0) {
+                    cout << "No grades to check for failing." << endl;
+                } else {
+                    int fails = countFailing(grades, gradeCount);
+                    cout << "Number of failing grades: " << fails << endl;
+                }
+                break;
+            }
+            case 5: {
+                if (gradeCount == 0) {
+                    cout << "No grades to check for highest." << endl;
+                } else {
+                    int highest = findMax(grades, gradeCount);
+                    cout << "Highest grade: " << highest << endl;
+                }
+                break;
+            }
+            case 6: {
+                cout << "Thank you for using Recursive Grade Analyzer!" << endl;
+                break;
+            }
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (choice != 6);
+
+    return 0;
+}
