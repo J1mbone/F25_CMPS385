@@ -1,0 +1,270 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+struct Item {
+    string name;
+    string category;
+    int quantity;
+    double price;
+};
+
+const int MAX_ITEMS = 100;
+
+int loadInventory(Item items[]);
+void saveInventory(Item items[], int count);
+void displayInventory(Item items[], int count);
+void buyItem(Item items[], int &count);
+void returnItem(Item items[], int count);
+void showProfitReport();
+void appendTransaction(const string &type, const string &itemName, int qty, double unitPrice);
+
+int main() {
+    Item items[MAX_ITEMS];
+    int itemCount = loadInventory(items);
+
+    int choice = 0;
+    cout << "******** Welcome to Store Inventory & Profit Tracker ********" << endl;
+    do {
+        cout << "\nPlease choose one of the following operations:" << endl;
+        cout << "1. Add New Item to Inventory" << endl;
+        cout << "2. Display Inventory" << endl;
+        cout << "3. Buy Item" << endl;
+        cout << "4. Return Item" << endl;
+        cout << "5. View Profit Report" << endl;
+        cout << "6. Exit" << endl;
+        cout << "→ ";
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number between 1 and 6." << endl;
+            continue;
+        }
+        cin.ignore();
+
+        switch (choice) {
+            case 1: {
+                if (itemCount >= MAX_ITEMS) {
+                    cout << "Inventory full. Cannot add more items." << endl;
+                    break;
+                }
+                Item newItem;
+                cout << "Enter item name: ";
+                getline(cin, newItem.name);
+                cout << "Enter category: ";
+                getline(cin, newItem.category);
+                cout << "Enter quantity: ";
+                cin >> newItem.quantity;
+                cout << "Enter price: ";
+                cin >> newItem.price;
+                cin.ignore();
+
+                items[itemCount++] = newItem;
+                cout << "Item added!" << endl;
+                break;
+            }
+            case 2: {
+                displayInventory(items, itemCount);
+                break;
+            }
+            case 3: {
+                buyItem(items, itemCount);
+                break;
+            }
+            case 4: {
+                returnItem(items, itemCount);
+                break;
+            }
+            case 5: {
+                showProfitReport();
+                break;
+            }
+            case 6: {
+                saveInventory(items, itemCount);
+                cout << "Inventory and transactions saved. Goodbye!" << endl;
+                break;
+            }
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (choice != 6);
+
+    return 0;
+}
+
+int loadInventory(Item items[]) {
+    ifstream fin("inventory.txt");
+    int count = 0;
+    if (!fin) {
+        return 0;
+    }
+
+    string line;
+    if (!getline(fin, line)) return 0;
+
+    while (getline(fin, line) && count < MAX_ITEMS) {
+        if (line.empty()) continue;
+        stringstream ss(line);
+        string name, category, qtyStr, priceStr;
+
+        if (!getline(ss, name, ',')) continue;
+        if (!getline(ss, category, ',')) continue;
+        if (!getline(ss, qtyStr, ',')) continue;
+        if (!getline(ss, priceStr, ',')) continue;
+
+        Item it;
+        it.name = name;
+        it.category = category;
+        it.quantity = stoi(qtyStr);
+        it.price = stod(priceStr);
+        items[count++] = it;
+    }
+
+    fin.close();
+    return count;
+}
+
+void saveInventory(Item items[], int count) {
+    ofstream fout("inventory.txt");
+    fout << "Name,Category,Quantity,Price" << endl;
+    for (int i = 0; i < count; ++i) {
+        fout << items[i].name << "," << items[i].category << "," << items[i].quantity << "," << fixed << setprecision(2) << items[i].price << endl;
+    }
+    fout.close();
+}
+
+void displayInventory(Item items[], int count) {
+    cout << "=========== INVENTORY ===========" << endl;
+    cout << left << setw(20) << "Name" << setw(15) << "Category" << setw(6) << "Qty" << setw(8) << "Price" << endl;
+    cout << "----------------------------------------" << endl;
+    for (int i = 0; i < count; ++i) {
+        cout << left << setw(20) << items[i].name << setw(15) << items[i].category << setw(6) << items[i].quantity << "$" << fixed << setprecision(2) << items[i].price << endl;
+    }
+}
+
+void appendTransaction(const string &type, const string &itemName, int qty, double unitPrice) {
+    ofstream fout("transactions.txt", ios::app);
+    if (!fout) return;
+    fout << type << "," << itemName << "," << qty << "," << fixed << setprecision(2) << unitPrice << endl;
+    fout.close();
+}
+
+void buyItem(Item items[], int &count) {
+    string name;
+    cout << "Enter item to buy: ";
+    getline(cin, name);
+
+    int idx = -1;
+    for (int i = 0; i < count; ++i) {
+        if (items[i].name == name) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == -1) {
+        cout << "Item not found in inventory." << endl;
+        return;
+    }
+
+    int qty;
+    cout << "Quantity: ";
+    cin >> qty;
+    cin.ignore();
+    if (qty <= 0) {
+        cout << "Invalid quantity." << endl;
+        return;
+    }
+    if (qty > items[idx].quantity) {
+        cout << "Not enough stock. Available: " << items[idx].quantity << endl;
+        return;
+    }
+
+    items[idx].quantity -= qty;
+    double total = qty * items[idx].price;
+    appendTransaction("BUY", items[idx].name, qty, items[idx].price);
+
+    cout << "Successfully purchased " << qty << " x " << items[idx].name << " for $" << fixed << setprecision(2) << total << endl;
+}
+
+void returnItem(Item items[], int count) {
+    string name;
+    cout << "Enter item to return: ";
+    getline(cin, name);
+
+    int idx = -1;
+    for (int i = 0; i < count; ++i) {
+        if (items[i].name == name) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == -1) {
+        cout << "Item not found in inventory." << endl;
+        return;
+    }
+
+    int qty;
+    cout << "Quantity: ";
+    cin >> qty;
+    cin.ignore();
+    if (qty <= 0) {
+        cout << "Invalid quantity." << endl;
+        return;
+    }
+
+    items[idx].quantity += qty;
+    appendTransaction("RETURN", items[idx].name, qty, items[idx].price);
+    cout << qty << " x " << items[idx].name << " returned and added back to inventory." << endl;
+}
+
+void showProfitReport() {
+    ifstream fin("transactions.txt");
+    double revenue = 0.0;
+    double refunds = 0.0;
+    if (!fin) {
+        cout << "========== PROFIT REPORT ==========" << endl;
+        cout << "Total Revenue: $0.00" << endl;
+        cout << "Total Refunds: $0.00" << endl;
+        cout << "Net Profit: $0.00" << endl;
+        cout << "====================================" << endl;
+        return;
+    }
+
+    string line;
+    if (getline(fin, line)) {
+        if (line.rfind("Type,", 0) != 0) {
+            stringstream ss(line);
+            string type, itemName, qtyStr, priceStr;
+            if (getline(ss, type, ',') && getline(ss, itemName, ',') && getline(ss, qtyStr, ',') && getline(ss, priceStr, ',')) {
+                int q = stoi(qtyStr);
+                double p = stod(priceStr);
+                if (type == "BUY") revenue += q * p;
+                else if (type == "RETURN") refunds += q * p;
+            }
+        }
+    }
+    while (getline(fin, line)) {
+        if (line.empty()) continue;
+        stringstream ss(line);
+        string type, itemName, qtyStr, priceStr;
+        if (!getline(ss, type, ',')) continue;
+        if (!getline(ss, itemName, ',')) continue;
+        if (!getline(ss, qtyStr, ',')) continue;
+        if (!getline(ss, priceStr, ',')) continue;
+        int q = stoi(qtyStr);
+        double p = stod(priceStr);
+        if (type == "BUY") revenue += q * p;
+        else if (type == "RETURN") refunds += q * p;
+    }
+    fin.close();
+
+    double net = revenue - refunds;
+    cout << "========== PROFIT REPORT ==========" << endl;
+    cout << "Total Revenue: $" << fixed << setprecision(2) << revenue << endl;
+    cout << "Total Refunds: $" << fixed << setprecision(2) << refunds << endl;
+    cout << "Net Profit: $" << fixed << setprecision(2) << net << endl;
+    cout << "====================================" << endl;
+}
