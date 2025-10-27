@@ -1,0 +1,209 @@
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+template <typename T1, typename T2>
+struct Appointment {
+    T1 id;
+    string name;
+    string type;
+    int timeUntil;
+    T2 bill;
+    string status;
+};
+
+template <typename T1, typename T2>
+int loadAppointments(Appointment<T1, T2> appointments[]);
+
+template <typename T1, typename T2>
+void saveAppointments(Appointment<T1, T2> appointments[], int count);
+
+template <typename T1, typename T2>
+void addAppointment(Appointment<T1, T2> appointments[], int &count);
+
+template <typename T1, typename T2>
+void displayAppointments(Appointment<T1, T2> appointments[], int count);
+
+template <typename T1, typename T2>
+void markCompleted(Appointment<T1, T2> appointments[], int count);
+
+template <typename T1, typename T2>
+void appointmentSummary(Appointment<T1, T2> appointments[], int count);
+
+
+template <typename T1, typename T2>
+int loadAppointments(Appointment<T1, T2> appointments[]) {
+    ifstream fin("appointments.txt");
+    int count = 0;
+    if (!fin) {
+        return 0;
+    }
+
+    while (!fin.eof() && count < 100) {
+        Appointment<T1, T2> a;
+        char comma;
+        fin >> ws;
+        if (fin.peek() == EOF) break;
+
+        getline(fin, a.id, ',');
+        getline(fin, a.name, ',');
+        getline(fin, a.type, ',');
+        fin >> a.timeUntil >> comma >> a.bill >> comma;
+        getline(fin, a.status);
+
+        if (fin) {
+            appointments[count++] = a;
+        }
+    }
+
+    fin.close();
+    return count;
+}
+
+template <typename T1, typename T2>
+void saveAppointments(Appointment<T1, T2> appointments[], int count) {
+    ofstream fout("appointments.txt");
+    for (int i = 0; i < count; i++) {
+        fout << appointments[i].id << ","
+             << appointments[i].name << ","
+             << appointments[i].type << ","
+             << appointments[i].timeUntil << ","
+             << fixed << setprecision(2) << appointments[i].bill << ","
+             << appointments[i].status;
+        if (i != count - 1)
+            fout << endl;
+    }
+    fout.close();
+}
+
+template <typename T1, typename T2>
+void addAppointment(Appointment<T1, T2> appointments[], int &count) {
+    if (count >= 100) {
+        cout << "Maximum appointments reached!" << endl;
+        return;
+    }
+
+    Appointment<T1, T2> a;
+    cout << "Enter appointment ID: ";
+    cin >> ws;
+    getline(cin, a.id);
+    cout << "Enter patient name: ";
+    getline(cin, a.name);
+    cout << "Enter appointment type (General/Dental/Emergency/etc.): ";
+    getline(cin, a.type);
+    cout << "Enter time until appointment (hours): ";
+    cin >> a.timeUntil;
+    cout << "Enter estimated bill: ";
+    cin >> a.bill;
+    a.status = "Pending";
+
+    appointments[count++] = a;
+    cout << "Appointment added!" << endl;
+}
+
+template <typename T1, typename T2>
+void displayAppointments(Appointment<T1, T2> appointments[], int count) {
+    if (count == 0) {
+        cout << "No appointments found." << endl;
+        return;
+    }
+
+    cout << "\n=========== APPOINTMENTS ===========" << endl;
+    cout << left << setw(10) << "ID" << setw(20) << "Name"
+         << setw(15) << "Type" << setw(8) << "Time"
+         << setw(10) << "Bill" << setw(12) << "Status" << endl;
+    cout << "-------------------------------------------------------------" << endl;
+
+    for (int i = 0; i < count; i++) {
+        cout << left << setw(10) << appointments[i].id
+             << setw(20) << appointments[i].name
+             << setw(15) << appointments[i].type
+             << setw(8) << appointments[i].timeUntil
+             << "$" << setw(9) << fixed << setprecision(2) << appointments[i].bill
+             << setw(12) << appointments[i].status << endl;
+    }
+}
+
+template <typename T1, typename T2>
+void markCompleted(Appointment<T1, T2> appointments[], int count) {
+    string searchID;
+    cout << "Enter appointment ID to mark as completed: ";
+    cin >> ws;
+    getline(cin, searchID);
+
+    bool found = false;
+    for (int i = 0; i < count; i++) {
+        if (appointments[i].id == searchID) {
+            appointments[i].status = "Completed";
+            cout << "Appointment " << searchID << " marked as Completed." << endl;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found)
+        cout << "Appointment ID not found." << endl;
+}
+
+template <typename T1, typename T2>
+void appointmentSummary(Appointment<T1, T2> appointments[], int count) {
+    int completed = 0, pending = 0;
+    double totalEarnings = 0.0;
+
+    for (int i = 0; i < count; i++) {
+        if (appointments[i].status == "Completed") {
+            completed++;
+            totalEarnings += appointments[i].bill;
+        } else {
+            pending++;
+        }
+    }
+
+    cout << "\n======== APPOINTMENT SUMMARY ========" << endl;
+    cout << "Total Appointments: " << count << endl;
+    cout << "Completed: " << completed << endl;
+    cout << "Pending: " << pending << endl;
+    cout << "Total Earnings: $" << fixed << setprecision(2) << totalEarnings << endl;
+    cout << "=====================================" << endl;
+}
+
+int main() {
+    Appointment<string, float> appointments[100];
+    int count = loadAppointments(appointments);
+
+    int choice;
+    do {
+        cout << "\n******* Welcome to Clinic Appointment Manager *******\n";
+        cout << "1. Add New Appointment\n";
+        cout << "2. Display All Appointments\n";
+        cout << "3. Mark Appointment as Completed\n";
+        cout << "4. View Appointment Summary\n";
+        cout << "5. Exit\n→ ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                addAppointment(appointments, count);
+                break;
+            case 2:
+                displayAppointments(appointments, count);
+                break;
+            case 3:
+                markCompleted(appointments, count);
+                break;
+            case 4:
+                appointmentSummary(appointments, count);
+                break;
+            case 5:
+                saveAppointments(appointments, count);
+                cout << "Data saved to appointments.txt. Goodbye!" << endl;
+                break;
+            default:
+                cout << "Invalid option. Try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
