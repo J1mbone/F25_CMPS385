@@ -1,0 +1,154 @@
+#include <iostream>
+#include <fstream>
+#include <list>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+struct Patient {
+    string id;
+    string name;
+    string severity;
+    int waitTime;
+    string status;
+};
+
+void loadPatients(list<Patient>& patients) {
+    ifstream inFile("patients.txt");
+    if (!inFile) return;
+
+    string line;
+    getline(inFile, line);
+
+    while (getline(inFile, line)) {
+        if (line.empty()) continue;
+
+        Patient p;
+        size_t pos = 0;
+
+        pos = line.find(',');
+        p.id = line.substr(0, pos);
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        p.name = line.substr(0, pos);
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        p.severity = line.substr(0, pos);
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        p.waitTime = stoi(line.substr(0, pos));
+        line.erase(0, pos + 1);
+
+        p.status = line;
+
+        patients.push_back(p);
+    }
+    inFile.close();
+}
+
+void savePatients(const list<Patient>& patients) {
+    ofstream outFile("patients.txt");
+    outFile << "ID,Name,Severity,Wait,Status\n";
+    for (const auto& p : patients) {
+        outFile << p.id << "," << p.name << "," << p.severity << ","
+                << p.waitTime << "," << p.status << "\n";
+    }
+}
+
+void registerPatient(list<Patient>& patients) {
+    Patient p;
+    cin.ignore(); // Clear buffer
+    cout << "Enter patient ID: ";
+    getline(cin, p.id);
+    cout << "Enter name: ";
+    getline(cin, p.name);
+    cout << "Enter condition severity: ";
+    getline(cin, p.severity);
+    cout << "Enter estimated wait time (minutes): ";
+    cin >> p.waitTime;
+    cin.ignore();
+    p.status = "Waiting";
+    patients.push_back(p);
+    cout << "Patient registered successfully!" << endl;
+}
+
+void displayQueue(const list<Patient>& patients) {
+    cout << "=========== ER WAITING LIST ===========\n";
+    cout << left << setw(10) << "ID" << setw(20) << "Name"
+         << setw(10) << "Severity" << setw(12) << "Wait(min)"
+         << "Status" << endl;
+    cout << "------------------------------------------------------\n";
+
+    for (const auto& p : patients) {
+        cout << left << setw(10) << p.id
+             << setw(20) << p.name
+             << setw(10) << p.severity
+             << setw(12) << p.waitTime
+             << p.status << endl;
+    }
+}
+
+void admitPatient(list<Patient>& patients) {
+    for (auto& p : patients) {
+        if (p.status == "Waiting") {
+            p.status = "Admitted";
+            cout << "Patient " << p.id << " has been admitted to the ER." << endl;
+            return;
+        }
+    }
+    cout << "No waiting patients to admit." << endl;
+}
+
+void viewSummary(const list<Patient>& patients) {
+    int total = patients.size();
+    int admitted = 0;
+    int waiting = 0;
+    double totalWait = 0;
+
+    for (const auto& p : patients) {
+        if (p.status == "Admitted")
+            admitted++;
+        else if (p.status == "Waiting") {
+            waiting++;
+            totalWait += p.waitTime;
+        }
+    }
+
+    double avgWait = (waiting > 0) ? totalWait / waiting : 0.0;
+
+    cout << "========== ER SUMMARY ==========\n";
+    cout << "Total Patients: " << total << endl;
+    cout << "Admitted: " << admitted << endl;
+    cout << "Waiting: " << waiting << endl;
+    cout << "Avg Wait Time (Waiting): " << fixed << setprecision(2) << avgWait << " minutes\n";
+    cout << "================================\n";
+}
+
+int main() {
+    list<Patient> patients;
+    loadPatients(patients);
+
+    int choice;
+    do {
+        cout << "\n****** Welcome to Emergency Room Queue Manager ******\n";
+        cout << "1. Register New Patient\n2. Display Patient Queue\n3. Admit Patient\n";
+        cout << "4. View ER Summary\n5. Exit\n→ ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: registerPatient(patients); break;
+            case 2: displayQueue(patients); break;
+            case 3: admitPatient(patients); break;
+            case 4: viewSummary(patients); break;
+            case 5: savePatients(patients);
+                    cout << "Patient queue saved to patients.txt. Have a safe shift!" << endl;
+                    break;
+            default: cout << "Invalid option. Try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
