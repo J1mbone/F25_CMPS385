@@ -1,0 +1,174 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+struct Order {
+    string id;
+    string name;
+    string item;
+    int quantity;
+    float price;
+    string status;
+};
+void loadOrders(vector<Order>& orders) {
+    ifstream inFile("orders.txt");
+    if (!inFile) return;
+
+    string line;
+    getline(inFile, line);
+
+    while (getline(inFile, line)) {
+        if (line.empty()) continue;
+
+        Order o;
+        size_t pos = 0;
+        string token;
+
+        pos = line.find(',');
+        o.id = line.substr(0, pos);
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        o.name = line.substr(0, pos);
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        o.item = line.substr(0, pos);
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        o.quantity = stoi(line.substr(0, pos));
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        o.price = stof(line.substr(0, pos));
+        line.erase(0, pos + 1);
+
+        pos = line.find(',');
+        line.erase(0, pos + 1);
+
+        o.status = line;
+
+        orders.push_back(o);
+    }
+
+    inFile.close();
+}
+
+void saveOrders(const vector<Order>& orders) {
+    ofstream outFile("orders.txt");
+    outFile << "ID,Name,Item,Qty,Price,Total,Status\n";
+    for (const auto& o : orders) {
+        float total = o.quantity * o.price;
+        outFile << o.id << "," << o.name << "," << o.item << ","
+                << o.quantity << "," << fixed << setprecision(2) << o.price
+                << "," << fixed << setprecision(2) << total << "," << o.status << "\n";
+    }
+}
+
+void placeOrder(vector<Order>& orders) {
+    Order o;
+    cin.ignore();
+    cout << "Enter Order ID: ";
+    getline(cin, o.id);
+    cout << "Enter customer name: ";
+    getline(cin, o.name);
+    cout << "Enter menu item: ";
+    getline(cin, o.item);
+    cout << "Enter quantity: ";
+    cin >> o.quantity;
+    cout << "Enter price per item: ";
+    cin >> o.price;
+    cin.ignore();
+    o.status = "Pending";
+    orders.push_back(o);
+    cout << "Order added!" << endl;
+}
+
+void displayOrders(const vector<Order>& orders) {
+    cout << "=========== CURRENT ORDERS ===========\n";
+    cout << left << setw(10) << "ID" << setw(15) << "Name" << setw(15)
+         << "Item" << setw(6) << "Qty" << setw(8) << "Price"
+         << setw(8) << "Total" << "Status" << endl;
+    cout << "---------------------------------------------------\n";
+
+    for (const auto& o : orders) {
+        float total = o.quantity * o.price;
+        cout << left << setw(10) << o.id
+             << setw(15) << o.name
+             << setw(15) << o.item
+             << setw(6) << o.quantity
+             << "$" << setw(7) << fixed << setprecision(2) << o.price
+             << "$" << setw(7) << fixed << setprecision(2) << total
+             << o.status << endl;
+    }
+}
+
+void markServed(vector<Order>& orders) {
+    string id;
+    cin.ignore();
+    cout << "Enter Order ID to mark as served: ";
+    getline(cin, id);
+
+    for (auto& o : orders) {
+        if (o.id == id) {
+            if (o.status == "Pending") {
+                o.status = "Served";
+                cout << "Order " << id << " marked as Served." << endl;
+            } else {
+                cout << "Order " << id << " is already Served." << endl;
+            }
+            return;
+        }
+    }
+    cout << "Order ID not found." << endl;
+}
+
+void salesSummary(const vector<Order>& orders) {
+    int totalOrders = orders.size();
+    int served = 0;
+    float totalSales = 0.0;
+
+    for (const auto& o : orders) {
+        if (o.status == "Served") {
+            served++;
+            totalSales += o.quantity * o.price;
+        }
+    }
+
+    cout << "========== SALES SUMMARY ==========\n";
+    cout << "Total Orders: " << totalOrders << endl;
+    cout << "Served: " << served << endl;
+    cout << "Pending: " << totalOrders - served << endl;
+    cout << "Total Sales: $" << fixed << setprecision(2) << totalSales << endl;
+    cout << "===================================\n";
+}
+
+int main() {
+    vector<Order> orders;
+    loadOrders(orders);
+
+    int choice;
+    do {
+        cout << "\n****** Welcome to Restaurant Order Manager ******\n";
+        cout << "1. Place New Order\n2. Display All Orders\n3. Mark Order as Served\n";
+        cout << "4. View Sales Summary\n5. Exit\n→ ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: placeOrder(orders); break;
+            case 2: displayOrders(orders); break;
+            case 3: markServed(orders); break;
+            case 4: salesSummary(orders); break;
+            case 5: saveOrders(orders);
+                    cout << "Orders saved to orders.txt. Have a great day!" << endl;
+                    break;
+            default: cout << "Invalid option. Try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
