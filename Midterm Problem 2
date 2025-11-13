@@ -1,0 +1,190 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+using namespace std;
+
+const int MAX = 100;
+
+struct Taxi {
+    int id;
+    string driver;
+    string model;
+    string plate;
+};
+
+struct Queue {
+    Taxi taxis[MAX];
+    int front;
+    int rear;
+    int count;
+};
+
+void initializeQueue(Queue &q);
+bool isEmpty(Queue q);
+bool isFull(Queue q);
+void enqueue(Queue &q, Taxi t);
+Taxi dequeue(Queue &q);
+Taxi getFront(Queue q);
+Taxi getRear(Queue q);
+void viewQueue(Queue q);
+void viewSummary(Queue q);
+void saveToFile(Queue q);
+
+int main() {
+    Queue q;
+    initializeQueue(q);
+    int choice;
+
+    cout << "****** Welcome to Airport Taxi Queue System ******\n";
+
+    do {
+        cout << "\nPlease choose one of the following operations:\n";
+        cout << "1. Add Taxi to Queue\n";
+        cout << "2. View Waiting Taxis\n";
+        cout << "3. Dispatch Next Taxi\n";
+        cout << "4. View Queue Summary\n";
+        cout << "5. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+        cin.ignore();
+
+        switch (choice) {
+            case 1: {
+                if (isFull(q)) {
+                    cout << "Queue is full. No more taxis can be added at this time.\n";
+                } else {
+                    Taxi t;
+                    cout << "Enter Taxi ID: ";
+                    cin >> t.id;
+                    cin.ignore();
+                    cout << "Enter Driver Name: ";
+                    getline(cin, t.driver);
+                    cout << "Enter Car Model: ";
+                    getline(cin, t.model);
+                    cout << "Enter License Plate: ";
+                    getline(cin, t.plate);
+
+                    enqueue(q, t);
+                    cout << "Taxi added to queue!\n";
+                }
+                break;
+            }
+
+            case 2:
+                viewQueue(q);
+                break;
+
+            case 3:
+                if (isEmpty(q)) {
+                    cout << "No taxis available for dispatch.\n";
+                } else {
+                    Taxi t = dequeue(q);
+                    cout << "Taxi dispatched:\n";
+                    cout << "ID: " << t.id << ", Driver: " << t.driver
+                         << ", Car: " << t.model << ", Plate: " << t.plate << "\n";
+                }
+                break;
+
+            case 4:
+                viewSummary(q);
+                break;
+
+            case 5:
+                saveToFile(q);
+                cout << "Taxi queue saved to taxis.txt. Have a safe dispatch!\n";
+                break;
+
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
+
+
+void initializeQueue(Queue &q) {
+    q.front = 0;
+    q.rear = -1;
+    q.count = 0;
+}
+
+bool isEmpty(Queue q) { return q.count == 0; }
+
+bool isFull(Queue q) { return q.count == MAX; }
+
+void enqueue(Queue &q, Taxi t) {
+    if (isFull(q)) return;
+    q.rear = (q.rear + 1) % MAX;
+    q.taxis[q.rear] = t;
+    q.count++;
+}
+
+Taxi dequeue(Queue &q) {
+    Taxi t = q.taxis[q.front];
+    q.front = (q.front + 1) % MAX;
+    q.count--;
+    return t;
+}
+
+Taxi getFront(Queue q) { return q.taxis[q.front]; }
+
+Taxi getRear(Queue q) { return q.taxis[q.rear]; }
+
+void viewQueue(Queue q) {
+    if (isEmpty(q)) {
+        cout << "Queue is empty. No taxis waiting.\n";
+        return;
+    }
+
+    cout << "========= WAITING TAXIS (Front to Rear) =========\n";
+    cout << left << setw(10) << "ID"
+         << setw(20) << "Driver"
+         << setw(15) << "Model"
+         << setw(12) << "Plate" << "\n";
+    cout << "---------------------------------------------\n";
+
+    int index = q.front;
+    for (int i = 0; i < q.count; i++) {
+        Taxi t = q.taxis[index];
+        cout << left << setw(10) << t.id
+             << setw(20) << t.driver
+             << setw(15) << t.model
+             << setw(12) << t.plate << "\n";
+        index = (index + 1) % MAX;
+    }
+}
+
+void viewSummary(Queue q) {
+    if (isEmpty(q)) {
+        cout << "Queue is empty. No taxis available.\n";
+        return;
+    }
+
+    Taxi f = getFront(q);
+    Taxi r = getRear(q);
+
+    cout << "========== QUEUE SUMMARY ==========\n";
+    cout << "Total Taxis Waiting: " << q.count << "\n";
+    cout << "Front Taxi: ID " << f.id << " – " << f.driver << "\n";
+    cout << "Rear Taxi: ID " << r.id << " – " << r.driver << "\n";
+    cout << "===================================\n";
+}
+
+void saveToFile(Queue q) {
+    ofstream file("taxis.txt");
+    if (!file) {
+        cerr << "Error saving file.\n";
+        return;
+    }
+
+    file << "ID,Driver,Model,Plate\n";
+    int index = q.front;
+    for (int i = 0; i < q.count; i++) {
+        Taxi t = q.taxis[index];
+        file << t.id << "," << t.driver << "," << t.model << "," << t.plate << "\n";
+        index = (index + 1) % MAX;
+    }
+    file.close();
+}
