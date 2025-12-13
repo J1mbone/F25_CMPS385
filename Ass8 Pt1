@@ -1,0 +1,199 @@
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+using namespace std;
+
+struct Song {
+    int id;
+    string title;
+    string artist;
+    float duration;
+    Song* prev;
+    Song* next;
+};
+
+Song* head = nullptr;
+Song* tail = nullptr;
+Song* current = nullptr;
+
+void loadPlaylist();
+void savePlaylist();
+void addSong();
+void displayPlaylist();
+void playNext();
+void playPrevious();
+void removeSong();
+
+void loadPlaylist() {
+    ifstream file("playlist.txt");
+    if (!file) return;
+
+    while (!file.eof()) {
+        Song* s = new Song();
+        char comma;
+        file >> s->id >> comma;
+        getline(file, s->title, ',');
+        getline(file, s->artist, ',');
+        file >> s->duration;
+
+        s->prev = tail;
+        s->next = nullptr;
+
+        if (!head)
+            head = tail = s;
+        else {
+            tail->next = s;
+            tail = s;
+        }
+    }
+    current = head;
+    file.close();
+}
+
+/* Save playlist to file */
+void savePlaylist() {
+    ofstream file("playlist.txt");
+    Song* temp = head;
+    while (temp) {
+        file << temp->id << ","
+             << temp->title << ","
+             << temp->artist << ","
+             << temp->duration << endl;
+        temp = temp->next;
+    }
+    file.close();
+}
+
+void addSong() {
+    Song* s = new Song();
+    cout << "Enter Song ID: ";
+    cin >> s->id;
+    cin.ignore();
+    cout << "Enter Title: ";
+    getline(cin, s->title);
+    cout << "Enter Artist: ";
+    getline(cin, s->artist);
+    cout << "Enter Duration (in minutes): ";
+    cin >> s->duration;
+
+    s->next = nullptr;
+    s->prev = tail;
+
+    if (!head)
+        head = tail = s;
+    else {
+        tail->next = s;
+        tail = s;
+    }
+
+    if (!current) current = head;
+    cout << "Song added to playlist!\n";
+}
+
+void displayPlaylist() {
+    if (!head) {
+        cout << "Playlist is empty.\n";
+        return;
+    }
+
+    cout << "\n========== CURRENT PLAYLIST ==========\n";
+    cout << left << setw(6) << "ID"
+         << setw(25) << "Title"
+         << setw(20) << "Artist"
+         << "Duration\n";
+    cout << "----------------------------------------------------\n";
+
+    Song* temp = head;
+    while (temp) {
+        cout << setw(6) << temp->id
+             << setw(25) << temp->title
+             << setw(20) << temp->artist
+             << temp->duration << endl;
+        temp = temp->next;
+    }
+}
+
+void playNext() {
+    if (!current || !current->next) {
+        cout << "You are at the last song.\n";
+        return;
+    }
+    current = current->next;
+    cout << "Now playing: " << current->title
+         << " by " << current->artist
+         << " (" << current->duration << " min)\n";
+}
+
+void playPrevious() {
+    if (!current || !current->prev) {
+        cout << "You are at the first song.\n";
+        return;
+    }
+    current = current->prev;
+    cout << "Now playing: " << current->title
+         << " by " << current->artist
+         << " (" << current->duration << " min)\n";
+}
+
+void removeSong() {
+    int id;
+    cout << "Enter Song ID to remove: ";
+    cin >> id;
+
+    Song* temp = head;
+    while (temp && temp->id != id)
+        temp = temp->next;
+
+    if (!temp) {
+        cout << "Song not found.\n";
+        return;
+    }
+
+    if (temp == current)
+        current = temp->next ? temp->next : temp->prev;
+
+    if (temp->prev)
+        temp->prev->next = temp->next;
+    else
+        head = temp->next;
+
+    if (temp->next)
+        temp->next->prev = temp->prev;
+    else
+        tail = temp->prev;
+
+    cout << "Song '" << temp->title << "' removed from playlist.\n";
+    delete temp;
+}
+
+int main() {
+    loadPlaylist();
+    int choice;
+
+    do {
+        cout << "\n****** Welcome to Music Playlist Manager ******\n";
+        cout << "1. Add Song to Playlist\n"
+             << "2. Display Playlist\n"
+             << "3. Play Next Song\n"
+             << "4. Play Previous Song\n"
+             << "5. Remove Song\n"
+             << "6. Save and Exit\n→ ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: addSong(); break;
+            case 2: displayPlaylist(); break;
+            case 3: playNext(); break;
+            case 4: playPrevious(); break;
+            case 5: removeSong(); break;
+            case 6:
+                savePlaylist();
+                cout << "Playlist saved. See you next jam!\n";
+                break;
+            default:
+                cout << "Invalid option. Try again.\n";
+        }
+    } while (choice != 6);
+
+    return 0;
+}
