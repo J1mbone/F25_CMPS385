@@ -1,0 +1,190 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <cctype>
+
+using namespace std;
+
+/*
+    Transparent Search Engine
+    CMPS 385 – Data Structures
+    Features:
+    - Inverted Index
+    - Multiple ranking strategies
+    - Transparent explanations
+*/
+
+// Stores frequency of keyword in a document
+struct DocInfo {
+    string docName;
+    int frequency;
+};
+
+// Stores document metadata
+struct Document {
+    string name;
+    string title;
+    int length;
+};
+
+// Global data structures
+map<string, vector<DocInfo>> invertedIndex;
+vector<Document> documents;
+
+/* Convert string to lowercase */
+string toLower(string s) {
+    for (char &c : s)
+        c = tolower(c);
+    return s;
+}
+
+/* Tokenize text into lowercase words */
+vector<string> tokenize(const string& text) {
+    vector<string> tokens;
+    string word;
+
+    for (char c : text) {
+        if (isalnum(c))
+            word += tolower(c);
+        else if (!word.empty()) {
+            tokens.push_back(word);
+            word.clear();
+        }
+    }
+    if (!word.empty())
+        tokens.push_back(word);
+
+    return tokens;
+}
+
+/* Load documents and build inverted index */
+void loadDocuments() {
+    cout << "\nLoading documents...\n";
+
+    for (int i = 1; i <= 20; i++) { // supports up to 20 docs
+        string filename = "data/doc" + to_string(i) + ".txt";
+        ifstream file(filename);
+
+        if (!file)
+            continue;
+
+        Document doc;
+        doc.name = filename;
+
+        getline(file, doc.title);
+
+        string line, fullText;
+        while (getline(file, line))
+            fullText += line + " ";
+
+        vector<string> words = tokenize(fullText);
+        doc.length = words.size();
+        documents.push_back(doc);
+
+        map<string, int> freq;
+        for (string w : words)
+            freq[w]++;
+
+        for (auto &pair : freq) {
+            invertedIndex[pair.first].push_back({filename, pair.second});
+        }
+
+        cout << "Loaded: " << filename << endl;
+        file.close();
+    }
+
+    cout << "Total documents loaded: " << documents.size() << endl;
+}
+
+/* Search keyword and rank results */
+void searchKeyword() {
+    string keyword;
+    cout << "\nEnter keyword to search: ";
+    cin >> keyword;
+    keyword = toLower(keyword);
+
+    if (invertedIndex.find(keyword) == invertedIndex.end()) {
+        cout << "No results found for \"" << keyword << "\".\n";
+        return;
+    }
+
+    cout << "\nChoose ranking method:\n";
+    cout << "1. Frequency-Based\n";
+    cout << "2. Length-Adjusted\n";
+    cout << "3. Title-Boosted\n→ ";
+
+    int choice;
+    cin >> choice;
+
+    struct Result {
+        string doc;
+        double score;
+        string explanation;
+    };
+
+    vector<Result> results;
+
+    for (auto &info : invertedIndex[keyword]) {
+        double score = info.frequency;
+        string explanation =
+            "keyword appears " + to_string(info.frequency) + " times";
+
+        for (auto &doc : documents) {
+            if (doc.name == info.docName) {
+                if (choice == 2) {
+                    score /= doc.length;
+                    explanation +=
+                        " and document is short (length-adjusted)";
+                }
+                if (choice == 3 &&
+                    toLower(doc.title).find(keyword) != string::npos) {
+                    score += 2;
+                    explanation +=
+                        " and appears in the title (title boost)";
+                }
+            }
+        }
+
+        results.push_back({info.docName, score, explanation});
+    }
+
+    sort(results.begin(), results.end(),
+         [](const Result &a, const Result &b) {
+             return a.score > b.score;
+         });
+
+    cout << "\n====== SEARCH RESULTS ======\n";
+    for (auto &r : results) {
+        cout << r.doc << " | Score: " << r.score << endl;
+        cout << "Reason: Ranked higher because " << r.explanation << ".\n\n";
+    }
+}
+
+/* Main Menu */
+int main() {
+    loadDocuments();
+
+    int choice;
+    do {
+        cout << "\n====== TRANSPARENT SEARCH ENGINE ======\n";
+        cout << "1. Search Keyword\n";
+        cout << "2. Exit\n→ ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                searchKeyword();
+                break;
+            case 2:
+                cout << "Exiting search engine. Goodbye!\n";
+                break;
+            default:
+                cout << "Invalid option. Try again.\n";
+        }
+    } while (choice != 2);
+
+    return 0;
+}
