@@ -1,0 +1,101 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+void countGrades(const string& grades, int& countA, int& countB, int& countC, int& countD)
+{
+    int length = grades.length();
+    countA = countB = countC = countD = 0;
+
+    __asm {
+        mov esi, grades.c_str() ; pointer to string
+        mov ecx, length        ; loop counter
+
+        xor eax, eax           ; A count
+        xor ebx, ebx           ; B count
+        xor edx, edx           ; C count
+        xor edi, edi           ; D count
+
+    NEXT_CHAR:
+        cmp ecx, 0
+        je DONE
+
+        mov al, [esi]
+        inc esi
+        dec ecx
+
+        cmp al, 'A'
+        je INC_A
+        cmp al, 'a'
+        je INC_A
+
+        cmp al, 'B'
+        je INC_B
+        cmp al, 'b'
+        je INC_B
+
+        cmp al, 'C'
+        je INC_C
+        cmp al, 'c'
+        je INC_C
+
+        cmp al, 'D'
+        je INC_D
+        cmp al, 'd'
+        je INC_D
+
+        jmp NEXT_CHAR
+
+    INC_A:
+        inc eax
+        jmp NEXT_CHAR
+
+    INC_B:
+        inc ebx
+        jmp NEXT_CHAR
+
+    INC_C:
+        inc edx
+        jmp NEXT_CHAR
+
+    INC_D:
+        inc edi
+        jmp NEXT_CHAR
+
+    DONE:
+        mov countA, eax
+        mov countB, ebx
+        mov countC, edx
+        mov countD, edi
+    }
+}
+
+int main()
+{
+    string grades;
+    int countA, countB, countC, countD;
+
+    cout << "Enter a string of grades: ";
+    cin >> grades;
+
+    countGrades(grades, countA, countB, countC, countD);
+
+    cout << "Number of A’s = " << countA << " = ";
+    for (int i = 0; i < countA; i++) cout << "A ";
+    cout << endl;
+
+    cout << "Number of B’s = " << countB << " = ";
+    for (int i = 0; i < countB; i++) cout << "B ";
+    cout << endl;
+
+    cout << "Number of C’s = " << countC << " = ";
+    for (int i = 0; i < countC; i++) cout << "C ";
+    cout << endl;
+
+    cout << "Number of D’s = " << countD << " = ";
+    for (int i = 0; i < countD; i++) cout << "D ";
+    cout << endl;
+
+    return 0;
+}
