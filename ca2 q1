@@ -1,0 +1,46 @@
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int age;
+    char gender;
+    int isMaleTeen = 0;
+
+    cout << "Enter age: ";
+    cin >> age;
+
+    cout << "Enter gender (M/F): ";
+    cin >> gender;
+
+    __asm {
+        mov eax, age        ; load age
+        cmp eax, 13
+        jl NOT_TEEN
+        cmp eax, 19
+        jg NOT_TEEN
+
+        mov al, gender     ; load gender
+        cmp al, 'M'
+        je MALE_TEEN
+        cmp al, 'm'
+        je MALE_TEEN
+        jmp NOT_TEEN
+
+    MALE_TEEN:
+        mov isMaleTeen, 1
+        jmp DONE
+
+    NOT_TEEN:
+        mov isMaleTeen, 0
+
+    DONE:
+    }
+
+    if (isMaleTeen)
+        cout << "User is a male teenager." << endl;
+    else
+        cout << "User is NOT a male teenager." << endl;
+
+    return 0;
+}
