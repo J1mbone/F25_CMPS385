@@ -1,0 +1,16 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main() {
+    const double PI = 3.14159;
+    double r = 0.75, h = 20;
+
+    double surfaceArea = PI * r * r + PI * r * h;
+    double volume = PI * r * r * h / 3;
+
+    cout << "Cone Surface Area: " << surfaceArea << endl;
+    cout << "Cone Volume: " << volume << endl;
+
+    return 0;
+}
