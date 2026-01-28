@@ -1,0 +1,35 @@
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+int main() {
+    const double SODA = 1.25, WATER = 0.95, JUICE = 2.25;
+    const double HOTDOG = 1.75, BURGER = 2.65;
+
+    int sodas, waters, juices;
+    int hotdogs, burgers;
+
+    cout << "How many drinks? ";
+    cin >> sodas;  // total drinks (not used directly)
+
+    cout << "Enter the number of soda, waters, and Juices: ";
+    cin >> sodas >> waters >> juices;
+
+    cout << "How many hotdogs? ";
+    cin >> hotdogs;
+
+    cout << "How many burgers? ";
+    cin >> burgers;
+
+    double total =
+        sodas * SODA +
+        waters * WATER +
+        juices * JUICE +
+        hotdogs * HOTDOG +
+        burgers * BURGER;
+
+    cout << fixed << setprecision(2);
+    cout << "Your total bill= " << total << endl;
+
+    return 0;
+}
