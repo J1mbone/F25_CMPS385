@@ -1,0 +1,38 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int s[2][4][2] = {
+        {{1,2},{3,4},{5,6},{7,8}},      // female
+        {{9,10},{11,12},{13,14},{15,16}} // male
+    };
+
+    int total = 0;
+    int undergrad = 0;
+    int biology = 0;
+    int female = 0;
+
+    for (int gender = 0; gender < 2; gender++) {
+        for (int major = 0; major < 4; major++) {
+            for (int level = 0; level < 2; level++) {
+                total += s[gender][major][level];
+
+                if (level == 0)
+                    undergrad += s[gender][major][level];
+
+                if (major == 2)
+                    biology += s[gender][major][level];
+
+                if (gender == 0)
+                    female += s[gender][major][level];
+            }
+        }
+    }
+
+    cout << "Total students: " << total << endl;
+    cout << "Total undergraduate students: " << undergrad << endl;
+    cout << "Total biology students: " << biology << endl;
+    cout << "Total female students: " << female << endl;
+
+    return 0;
+}
