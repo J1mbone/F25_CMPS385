@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main() {
+    unsigned short bx = 0b1100110011000010;
+
+    int printers   = (bx >> 13) & 0x7;
+    int disks      = (bx >> 10) & 0x3;
+    int memoryCode = (bx >> 6)  & 0x7;
+    int terminals  = bx & 0x3;           
+
+    printf("Content of bx = 1100 1100 1100 0010\n");
+    printf("The number of printers is %d\n", printers);
+    printf("The number of disk drives is %d\n", disks);
+    printf("Memory size is %dG\n", memoryCode);
+    printf("The number of terminals is %d\n", terminals);
+
+    return 0;
+}
