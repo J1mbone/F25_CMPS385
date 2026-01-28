@@ -1,0 +1,20 @@
+#include <iostream>
+#include <bitset>
+using namespace std;
+
+int main() {
+    unsigned short ax = 0xF47E;
+    int left = 0, right = 0;
+
+    for (int i = 8; i < 16; i++)
+        if ((ax >> i) & 1) left++;
+
+    for (int i = 0; i < 8; i++)
+        if ((ax >> i) & 1) right++;
+
+    cout << "Content of ax register = " << bitset<16>(ax) << endl;
+    cout << "Number of sprinklers watering left side = " << left << endl;
+    cout << "Number of sprinklers watering right side = " << right << endl;
+
+    return 0;
+}
