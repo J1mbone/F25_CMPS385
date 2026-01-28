@@ -1,0 +1,26 @@
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+using namespace std;
+
+int main() {
+    const double PI = 3.141592653589793;
+    double r = 4.7;
+    double h = 10.9;
+
+    double s = sqrt(r * r + h * h);
+
+    double volume = (PI * r * r * h) / 3.0;
+
+    double surfaceArea = PI * r * r + PI * r * s;
+
+    cout << fixed << setprecision(2);
+    cout << "Volume = " << volume << endl;
+    cout << "Surface area = " << surfaceArea << endl;
+
+    cout << "Press any key to continue . . .";
+    cin.get();
+    cin.get();
+
+    return 0;
+}
