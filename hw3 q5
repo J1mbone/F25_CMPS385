@@ -1,0 +1,27 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a[2][3][2] = {
+        {{1,2},{3,4},{5,6}},
+        {{7,8},{9,10},{11,12}}
+    };
+
+    int total = 0;
+
+    __asm {
+        lea esi, a
+        mov ecx, 12
+        xor eax, eax
+
+    sumLoop:
+        add eax, [esi]
+        add esi, 4
+        loop sumLoop
+
+        mov total, eax
+    }
+
+    cout << "Total of all entries = " << total << endl;
+    return 0;
+}
