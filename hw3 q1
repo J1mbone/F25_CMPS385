@@ -1,0 +1,18 @@
+#include <iostream>
+#include <bitset>
+using namespace std;
+
+int main() {
+    unsigned short ax = 0xBEEF;
+
+    cout << "Ax = " << bitset<16>(ax) << endl;
+    cout << "The following security lights are off:" << endl;
+
+    for (int i = 0; i < 16; i++) {
+        if (((ax >> (15 - i)) & 1) == 0)
+            cout << (i + 1) << " ";
+    }
+
+    cout << endl;
+    return 0;
+}
