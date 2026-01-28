@@ -1,0 +1,16 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main() {
+    const double PI = 3.14159;
+    double r = 10.05, h = 20.11;
+
+    double volume = PI * r * r * h;
+    double surfaceArea = 2 * PI * r * r + 2 * PI * r * h;
+
+    cout << "Cylinder Volume: " << volume << endl;
+    cout << "Cylinder Surface Area: " << surfaceArea << endl;
+
+    return 0;
+}
