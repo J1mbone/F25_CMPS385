@@ -1,0 +1,33 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+int main() {
+    int odd = 0, even = 0;
+    char choice = 'y';
+
+    srand(time(0));
+
+    while (choice == 'y') {
+        int die = rand() % 6 + 1;
+        cout << "Die shows: " << die << endl;
+
+        if (die % 2 == 0)
+            even++;
+        else
+            odd++;
+
+        cout << "CONTINUE(y/n)? ";
+        cin >> choice;
+    }
+
+    if (odd > even)
+        cout << "There are more ODD outcomes" << endl;
+    else if (even > odd)
+        cout << "There are more EVEN outcomes" << endl;
+    else
+        cout << "ODD and EVEN outcomes are equal" << endl;
+
+    return 0;
+}
