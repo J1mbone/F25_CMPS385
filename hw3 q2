@@ -1,0 +1,20 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    unsigned short ax = 0xBEEF;
+    int result;
+
+    __asm {
+        mov ax, 0BEEFh
+        and ax, 1
+        mov result, ax
+    }
+
+    if (result == 0)
+        cout << "AX is EVEN" << endl;
+    else
+        cout << "AX is ODD" << endl;
+
+    return 0;
+}
