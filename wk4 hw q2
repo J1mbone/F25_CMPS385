@@ -1,0 +1,20 @@
+#include <iostream>
+using namespace std;
+
+int main(){
+    double a=10.0, c=6.0, b;
+
+    __asm {
+        fld a
+        fmul st(0), st(0)
+
+        fld c
+        fmul st(0), st(0)
+
+        fsub
+        fsqrt
+        fstp b
+    }
+
+    cout<<"b = "<<b<<endl;
+}
