@@ -1,0 +1,37 @@
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+int main(){
+    char more='y';
+
+    while(more=='y'){
+        int foodQty, drinkQty;
+        char food, drink;
+        float total=0;
+
+        cout<<"Order number of food: ";
+        cin>>foodQty;
+        cout<<"Food type (H/C/D): ";
+        cin>>food;
+
+        if(food=='H') total += foodQty*3.30;
+        if(food=='C') total += foodQty*3.45;
+        if(food=='D') total += foodQty*4.45;
+
+        cout<<"How many drinks: ";
+        cin>>drinkQty;
+        cout<<"Drink size (S/M/L): ";
+        cin>>drink;
+
+        if(drink=='S') total += drinkQty*1.10;
+        if(drink=='M') total += drinkQty*1.50;
+        if(drink=='L') total += drinkQty*1.75;
+
+        cout<<fixed<<setprecision(2);
+        cout<<"Total Bill = $"<<total<<endl;
+
+        cout<<"More customers (y/n)? ";
+        cin>>more;
+    }
+}
