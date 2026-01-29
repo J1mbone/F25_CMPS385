@@ -1,0 +1,23 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a[2][3][2];
+    int val = 1;
+
+    for(int c=0;c<2;c++)
+        for(int s=0;s<3;s++)
+            for(int sl=0;sl<2;sl++)
+                a[c][s][sl] = val++;
+
+    int redTotal = 0, greenTotal = 0;
+
+    for(int s=0;s<3;s++)
+        for(int sl=0;sl<2;sl++){
+            redTotal += a[0][s][sl];
+            greenTotal += a[1][s][sl]; 
+        }
+
+    cout<<"Total Red Shirts = "<<redTotal<<endl;
+    cout<<"Total Green Shirts = "<<greenTotal<<endl;
+}
