@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+# ==========================================
+# Linux Automated System Monitoring Tool
+# ==========================================
+
+import psutil
+import time
+from datetime import datetime
+
+LOGFILE = "system_log.txt"
+
+CPU_LIMIT = 80
+MEM_LIMIT = 80
+DISK_LIMIT = 80
+
+
+def get_cpu_usage():
+    return psutil.cpu_percent(interval=1)
+
+
+def get_memory_usage():
+    mem = psutil.virtual_memory()
+    return mem.percent
+
+
+def get_disk_usage():
+    disk = psutil.disk_usage("/")
+    return disk.percent
+
+
+def log_data(cpu, mem, disk):
+    with open(LOGFILE, "a") as f:
+        f.write(f"{datetime.now()} CPU={cpu}% MEM={mem}% DISK={disk}%\n")
+
+
+def check_alerts(cpu, mem, disk):
+    if cpu > CPU_LIMIT:
+        print(f"ALERT: CPU usage above {CPU_LIMIT}%")
+
+    if mem > MEM_LIMIT:
+        print(f"ALERT: Memory usage above {MEM_LIMIT}%")
+
+    if disk > DISK_LIMIT:
+        print(f"ALERT: Disk usage above {DISK_LIMIT}%")
+
+
+def show_top_processes():
+    print("\nTop 5 Processes by CPU:")
+    processes = []
+    for proc in psutil.process_iter(['pid', 'name', 'cpu_percent']):
+        processes.append(proc.info)
+
+    processes = sorted(processes, key=lambda p: p['cpu_percent'], reverse=True)
+
+    for p in processes[:5]:
+        print(f"PID {p['pid']} | {p['name']} | {p['cpu_percent']}%")
+
+
+def main():
+    print("==============================")
+    print(" Linux System Monitoring Tool ")
+    print("==============================")
+
+    cpu = get_cpu_usage()
+    mem = get_memory_usage()
+    disk = get_disk_usage()
+
+    print(f"CPU Usage: {cpu}%")
+    print(f"Memory Usage: {mem}%")
+    print(f"Disk Usage: {disk}%")
+
+    log_data(cpu, mem, disk)
+    check_alerts(cpu, mem, disk)
+    show_top_processes()
+
+    print("\nMonitoring complete.")
+
+
+if __name__ == "__main__":
+    main()
