@@ -1,0 +1,34 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a[3][4][3];
+    int val = 1;
+
+    for(int i=0;i<3;i++)
+        for(int j=0;j<4;j++)
+            for(int k=0;k<3;k++)
+                a[i][j][k] = val++;
+
+    int total=0, greenWool=0, polyester=0, blackMedium=0;
+
+    for(int i=0;i<3;i++)
+        for(int j=0;j<4;j++)
+            for(int k=0;k<3;k++){
+                total += a[i][j][k];
+
+                if(i==1 && j==1) greenWool += a[i][j][k];
+                if(i==2) polyester += a[i][j][k];
+                if(j==2 && k==1) blackMedium += a[i][j][k];
+            }
+
+    cout<<"Total shirts: "<<total<<endl;
+    cout<<"Green Wool shirts: "<<greenWool<<endl;
+    cout<<"Polyester shirts: "<<polyester<<endl;
+    cout<<"Black Medium shirts: "<<blackMedium<<endl;
+}
+
+
+
+
+
