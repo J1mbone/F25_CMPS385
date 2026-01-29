@@ -1,0 +1,45 @@
+#include <iostream>
+using namespace std;
+
+int main(){
+    double r=5.0, h=8.0;
+    double volume, surface;
+    double pi=3.14159;
+
+    __asm{
+        // V = pi*r*r*h
+        fld pi
+        fld r
+        fmul st,st
+        fmul
+        fld h
+        fmul
+        fstp volume
+
+        // SA = 2*pi*r*r + 2*pi*r*h
+        fld pi
+        fld r
+        fmul st,st
+        fmul
+        fld1
+        fld1
+        fadd
+        fmul
+
+        fld pi
+        fld r
+        fmul
+        fld h
+        fmul
+        fld1
+        fld1
+        fadd
+        fmul
+
+        fadd
+        fstp surface
+    }
+
+    cout<<"Volume = "<<volume<<endl;
+    cout<<"Surface Area = "<<surface<<endl;
+}
