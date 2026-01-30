@@ -1,0 +1,122 @@
+CMPS 260 – Linux Assignment
+Name: Jimmy Rumsey
+Course: CMPS 260 – Introduction to Linux
+Semester: January 2026
+
+-----------------------------
+Problem 0
+-----------------------------
+
+Q1: What does pwd do?
+pwd prints the current working directory. It shows the absolute path of the folder you are currently in.
+
+Q2: What does whoami do?
+whoami prints the username of the currently logged-in user.
+
+-----------------------------
+Problem 1
+-----------------------------
+
+Q1: Why do these commands behave differently?
+
+ls ; date
+ls ";" date
+
+The semicolon (;) is a command separator that allows multiple commands to be executed sequentially.  
+So:
+
+ls ; date  
+runs ls first, then runs date.
+
+ls ";" date  
+treats ";" and "date" as filenames passed to ls, so ls tries to list files named ; and date instead of running the date command.
+
+-----------------------------
+
+Q2: Explain what happens in Step 6
+
+The mkdir -p command creates multiple directories at once, including parent directories if they do not already exist.  
+The ls -R data command recursively lists everything inside the data directory, showing the full folder structure.
+
+-----------------------------
+
+Q3: Explain what happened in Steps 17–21
+
+The umask command shows the default permission mask used when creating new files.  
+After changing the umask, newly created files have different default permissions.  
+u_before.txt was created using the original umask, while u_after.txt was created using the new umask, demonstrating how umask affects file permissions.
+
+-----------------------------
+
+Q4: Explain what happened in Steps 23–24
+
+The hard link and the original file point to the same inode, so deleting the original file does not remove the data.  
+The symbolic link only points to the filename, so once the original file is deleted, the symlink becomes broken.
+
+-----------------------------
+
+Q5: Explain what happened in Steps 29–30
+
+diff shows the line-by-line differences between the two files.  
+cmp reports the first byte and line where the files differ.  
+Both commands confirm that the files are similar but not identical.
+
+
+
+mkdir -p ~/cmps260/linux_assignment/{data,outputs,scripts}
+cd ~/cmps260/linux_assignment
+pwd
+whoami
+
+
+
+pwd > outputs/problem0_commands.txt
+whoami >> outputs/problem0_commands.txt
+
+
+
+ls ; date
+ls ";" date
+man -f ls
+man -k shell
+man 1 ls | head -n 30
+find data -name "*.txt"
+find data -type f -size +0c
+find data -name "*.txt" -exec wc -w {} \;
+diff data/a.txt data/b.txt
+cmp data/a.txt data/b.txt
+
+
+ls ; date > outputs/problem1_commands.txt
+ls ";" date >> outputs/problem1_commands.txt
+find data -name "*.txt" >> outputs/problem1_commands.txt
+find data -type f -size +0c >> outputs/problem1_commands.txt
+diff data/a.txt data/b.txt >> outputs/problem1_commands.txt
+cmp data/a.txt data/b.txt >> outputs/problem1_commands.txt
+
+
+
+
+find data -name "*.txt"
+find data -type f -size +0c
+find data -name "*.txt" -exec wc -w {} \;
+
+
+
+echo "dash file demo" > -- -dashfile.txt
+cat -- -dashfile.txt
+
+
+
+
+chmod 640 data/notes/perms.txt
+ls -l data/notes/perms.txt
+
+
+
+
+umask
+touch data/u_before.txt
+umask 027
+touch data/u_after.txt
+ls -l data/u_before.txt data/u_after.txt
